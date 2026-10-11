@@ -1,0 +1,10 @@
+data/
+data_cache.pt
+*.tar.gz
+__pycache__/
+results/**/*.pt
+results/**/*.npz
+norm.npz
+indices_and_graphseq.npz
+results/**/.running
+results/**/*.joblib

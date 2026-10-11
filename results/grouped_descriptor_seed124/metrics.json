@@ -1,0 +1,18 @@
+{
+  "split": "grouped",
+  "model": "gradient_boosting",
+  "seed": 124,
+  "samples": 2287,
+  "descriptor_dimensions": 44,
+  "validation_candidates": {
+    "extra_trees": 0.0001863340594255526,
+    "random_forest": 0.00018952015037205212,
+    "gradient_boosting": 0.000183540214589863
+  },
+  "test_rmse": 0.0002052450953232058,
+  "test_mae": 0.00013877697698265522,
+  "test_relative_absolute_error": 0.26242216912148103,
+  "test_r2": 0.6716598240155507,
+  "train_test_graph_overlap": 0,
+  "seconds": 119.19112658500671
+}

@@ -1,0 +1,23 @@
+{
+  "epochs": 2,
+  "seed": 124,
+  "split": "grouped",
+  "model": "baseline",
+  "threads": 4,
+  "samples": 2287,
+  "train_samples": 1824,
+  "validation_samples": 232,
+  "test_samples": 231,
+  "train_test_graph_overlap": 0,
+  "parameters": 1055700,
+  "best_epoch": 2,
+  "validation_rmse": 0.0003734254278242588,
+  "test_rmse": 0.00036802893737331033,
+  "test_mae": 0.00032125681173056364,
+  "test_relative_absolute_error": 0.6074848771095276,
+  "test_r2": -0.055704474449157715,
+  "seconds": 1.4171903133392334,
+  "target_mean": 0.000608556903898716,
+  "target_std": 0.00036685113445855677,
+  "torch": "2.14.0+cpu"
+}

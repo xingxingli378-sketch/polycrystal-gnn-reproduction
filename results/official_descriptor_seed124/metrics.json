@@ -1,0 +1,18 @@
+{
+  "split": "official",
+  "model": "extra_trees",
+  "seed": 124,
+  "samples": 2287,
+  "descriptor_dimensions": 44,
+  "validation_candidates": {
+    "extra_trees": 7.798830704937167e-05,
+    "random_forest": 8.704705918154621e-05,
+    "gradient_boosting": 0.00012082091851607513
+  },
+  "test_rmse": 8.152980933448188e-05,
+  "test_mae": 4.9634144883040935e-05,
+  "test_relative_absolute_error": 0.08028660633327075,
+  "test_r2": 0.9503620599757938,
+  "train_test_graph_overlap": 185,
+  "seconds": 123.64796042442322
+}
