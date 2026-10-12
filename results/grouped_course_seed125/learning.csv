@@ -1,0 +1,2 @@
+epoch,train_normalized_mse,validation_rmse,elapsed_seconds
+1,1.0005545480209483,0.00037367487675510347,4.087465763092041

@@ -1,4 +1,4 @@
-"""CPU-friendly corrected-paper baseline and permutation-invariant ablation."""
+"""在Anaconda环境运行更正后的论文基线、池化改进和课程版GCN。"""
 import argparse
 import atexit
 import csv
@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch import nn
+from course_model import CourseGNN
 
 
 class Baseline(nn.Module):
@@ -106,24 +107,25 @@ def load(root):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('--epochs', type=int, default=1500)
-    ap.add_argument('--seed', type=int, default=124)
+    ap = argparse.ArgumentParser(description='公共数据集GNN训练与评测：论文基线、池化改进、课程版GCN')
+    ap.add_argument('--epochs', type=int, default=1500, help='训练轮数上限')
+    ap.add_argument('--seed', type=int, default=124, help='随机种子')
     ap.add_argument(
         '--split',
         choices=[
             'official',
             'grouped'],
-        default='grouped')
+        default='grouped', help='official：官方兼容划分；grouped：按微结构隔离')
     ap.add_argument(
         '--model',
         choices=[
             'baseline',
-            'pooled'],
-        default='baseline')
-    ap.add_argument('--threads', type=int, default=0)
-    ap.add_argument('--fast', action='store_true')
-    ap.add_argument('--overwrite', action='store_true')
+            'pooled',
+            'course'],
+        default='baseline', help='baseline：论文基线；pooled：池化改进；course：课程版GCN')
+    ap.add_argument('--threads', type=int, default=0, help='CPU线程数，0表示自动选择')
+    ap.add_argument('--fast', action='store_true', help='启用论文基线的矩阵计算换序加速')
+    ap.add_argument('--overwrite', action='store_true', help='明确覆盖同目录已有结果，请先归档')
     args = ap.parse_args()
     if args.threads == 0:
         args.threads = 2 if args.model == 'baseline' else 4
@@ -134,18 +136,18 @@ def main():
         previous = json.loads((out / 'metrics.json').read_text())
         if previous.get('max_epochs', previous['epochs']) != args.epochs:
             raise RuntimeError(
-                'Existing result has a different epoch budget. Archive it and use --overwrite to rerun.')
+                '已有结果的训练轮数不同。请先归档旧目录，再使用 --overwrite 重新运行。')
         print(
-            'Completed run already exists; use --overwrite to rerun:',
+            '已有完整结果，默认跳过；重新运行需使用 --overwrite：',
             out,
             flush=True)
         return
     lock = out / '.running'
     try:
         with lock.open('x') as f:
-            f.write('Training in progress\n')
+            f.write('模型正在训练\n')
     except FileExistsError:
-        print('Run already in progress:', out, flush=True)
+        print('同一配置已有运行中的实验：', out, flush=True)
         return
     atexit.register(lambda: lock.unlink(missing_ok=True))
     torch.set_num_threads(args.threads)
@@ -175,8 +177,12 @@ def main():
     mu = float(norm.mean())
     sd = float(norm.std())
     target = torch.tensor((y - mu) / sd)
-    model = (FastBaseline() if args.fast else Baseline()
-             ) if args.model == 'baseline' else Pooled()
+    if args.model == 'baseline':
+        model = FastBaseline() if args.fast else Baseline()
+    elif args.model == 'course':
+        model = CourseGNN(include_field=True)
+    else:
+        model = Pooled()
     opt = torch.optim.Adam(model.parameters(),
                            lr=.0005 if args.model == 'baseline' else .001)
     out = root / 'results' / f'{args.split}_{args.model}_seed{args.seed}'
@@ -224,9 +230,9 @@ def main():
                     args.split,
                     args.model,
                     epoch + 1,
-                    'val RMSE',
+                    '验证RMSE',
                     rmse,
-                    'seconds',
+                    '耗时秒',
                     round(
                         time.time() - start),
                     flush=True)

@@ -1,16 +1,24 @@
-# Verification record
+# 本地运行验证记录
 
-The following checks were executed locally before the comparison runs:
+## 公共数据集复现
 
-- Unoptimized `Baseline` forward output matches the corrected upstream `GraphModel` exactly for identical state dictionaries and four real microstructures.
-- `FastBaseline` forward outputs match `Baseline` within `rtol=1e-5, atol=1e-6`; all parameter gradients match within `rtol=1e-4, atol=1e-5`.
-- The pooled candidate preserves its prediction after a shared permutation of node features, adjacency rows/columns and node masks, within float32 tolerances.
-- Official validation/test indices match the original scikit-learn `KFold(10, shuffle=True, random_state=123)` after the original graph shuffle.
-- Inputs are finite; there are 492 structures and 2287 retained observations.
-- A two-epoch smoke training run completed and wrote metrics/predictions/checkpoints. Its scores are excluded from the formal comparison.
-- The single-structure `predict.py` entry point completed using a saved GNN checkpoint and produced finite magnetostriction/microstrain predictions.
-- Three GNN configurations finished 300 epochs. The grouped baseline was finalized at 138 epochs after validation stagnation; its best checkpoint was at epoch 15.
-- Six descriptor candidates (three per split) were fit, with model selection on validation RMSE and final test evaluation of the selected candidate only.
-- Final learning-curve and prediction plots were rendered and visually inspected.
+- 原操作顺序的论文基线与更正后官方 `GraphModel` 使用相同权重及四个真实微结构时，前向输出完全一致。
+- 换序加速基线与原操作顺序的输出满足 `rtol=1e-5, atol=1e-6`，参数梯度满足 `rtol=1e-4, atol=1e-5`。
+- 池化改进模型通过节点编号置换后的预测不变性检查。
+- 官方兼容划分的索引与原始 scikit-learn KFold 的验证/测试索引一致。
+- 输入有限，读取492个微结构、2287条有效观测。
+- 三组正式GNN实验完成300轮；分组基线在验证误差长期无改善后于138轮结束，最佳权重在第15轮。
+- 每种划分拟合三个统计特征候选，只根据验证RMSE选择最终模型，之后评估测试集。
+- 已保存模型的单结构预测入口可以运行。CSV/JSON和权重目录可以相互追踪。
 
-Re-run model checks using `python check_port.py`. Syntax checks passed for all added Python entry points. A fresh Conda environment installation and GPU execution have not been verified.
+## 按阶段汇报补充的参考模块
+
+- Bunge旋转满足正交性、行列式为1以及全局/局部坐标往返一致性。
+- 周期性均匀磁化得到零退磁场；单频纵向/横向磁化与解析结果一致。
+- 课程版GCN在有邻接边的链图上通过节点编号置换和补零不变性检查，五/六特征入口均可用。
+- `course` 模型在Anaconda环境完成一轮训练，生成指标、预测文件与模型权重。此检查不计入正式精度比较。
+- 中文学习曲线和六组预测散点已重新生成并检查，原始实验数值保持一致。
+
+复查命令：`python check_port.py` 和 `python check_course_modules.py`。
+
+尚未验证新建Conda环境、GPU训练、完整LLG/弹性耦合、小组原始模拟数据、汇报的1.66%及小组自建数据的IG结果。当前物理模块的解析检查不替代完整模拟器的收敛与材料参数验证。
